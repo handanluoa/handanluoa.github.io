@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aesthetic Video Dataset System | Handan Luo</title>
+  <meta
+    name="description"
+    content="一个围绕审美偏好学习构建的视频数据集系统项目主页，包含数据设计、标注规范、偏好学习与落地流程。"
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav">
+      <div class="brand">handanluoa</div>
+      <div class="nav-links">
+        <a href="#overview">项目概览</a>
+        <a href="#system">系统设计</a>
+        <a href="#schema">数据结构</a>
+        <a href="#workflow">工作流</a>
+        <a href="#contact">联系</a>
+      </div>
+    </nav>
+
+    <section class="hero-content">
+      <p class="eyebrow">Project Showcase</p>
+      <h1>审美偏好视频数据集系统</h1>
+      <p class="subtitle">
+        这个项目把目录中的数据集设计、标注规范、偏好标注规则和元数据模板整合成一套可执行的数据生产系统，
+        目标不是单纯收集视频，而是让模型稳定学习一组可复现、可迁移的审美趋势。
+      </p>
+      <div class="hero-actions">
+        <a class="button primary" href="#overview">查看项目</a>
+        <a class="button secondary" href="https://github.com/handanluoa" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+      <div class="hero-metrics">
+        <article>
+          <strong>3</strong>
+          <span>核心 aesthetic buckets</span>
+        </article>
+        <article>
+          <strong>4</strong>
+          <span>数据等级 S / A / B / P</span>
+        </article>
+        <article>
+          <strong>3-layer</strong>
+          <span>文本监督结构</span>
+        </article>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section class="section" id="overview">
+      <div class="section-heading">
+        <p class="section-label">Overview</p>
+        <h2>项目概览</h2>
+      </div>
+      <div class="overview-grid">
+        <article class="card">
+          <h3>项目目标</h3>
+          <p>
+            构建一个面向视频生成与偏好学习的数据系统，让模型不仅学会视频内容生成，
+            还能够学会构图、光线、色彩、人物气质和镜头节奏等稳定的视觉风格偏置。
+          </p>
+        </article>
+        <article class="card">
+          <h3>核心问题</h3>
+          <p>
+            普通视频数据常见的问题是文本脏乱、风格混杂、人物 identity 漂移、时序信号不稳定。
+            本项目通过受控词表、镜头级切片、结构化审核和偏好对比数据来解决这些问题。
+          </p>
+        </article>
+        <article class="card">
+          <h3>落地价值</h3>
+          <p>
+            这套系统既能服务训练数据生产，也能作为后续 reward modeling、DPO、
+            reranking 与审美 benchmark 的基础设施。
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="system">
+      <div class="section-heading">
+        <p class="section-label">System Design</p>
+        <h2>系统设计</h2>
+      </div>
+      <div class="feature-grid">
+        <article class="project-card">
+          <p class="project-type">01 / DATA LAYERS</p>
+          <h3>四层数据结构</h3>
+          <p>
+            以 S 级锚点数据为核心，配合 A 级主体扩展、B 级长尾补充和 P 级偏好样本，
+            让训练既保持风格纯度，又能避免模板化。
+          </p>
+          <ul class="detail-list">
+            <li>S: 核心审美锚点</li>
+            <li>A: 高质量扩展样本</li>
+            <li>B: 稀缺分布补洞</li>
+            <li>P: chosen / rejected 偏好对</li>
+          </ul>
+        </article>
+
+        <article class="project-card">
+          <p class="project-type">02 / STYLE SYSTEM</p>
+          <h3>受控风格桶</h3>
+          <p>
+            首版聚焦三个主风格桶，避免风格中心过散，并为每个桶建立稳定的光线、色调、
+            构图和动作表达方式。
+          </p>
+          <ul class="detail-list">
+            <li>`minimal_indoor_portrait`</li>
+            <li>`soft_outdoor_lifestyle`</li>
+            <li>`cinematic_urban_closeup`</li>
+          </ul>
+        </article>
+
+        <article class="project-card">
+          <p class="project-type">03 / TEXT SUPERVISION</p>
+          <h3>三层文本监督</h3>
+          <p>
+            每个 clip 同时生成 factual caption、aesthetic caption 与 training prompt，
+            分别负责强对齐、显式审美表达与训练推理迁移。
+          </p>
+          <ul class="detail-list">
+            <li>事实层: 只写可见信息</li>
+            <li>审美层: 描述气质与风格</li>
+            <li>生成层: 压缩成可控 prompt</li>
+          </ul>
+        </article>
+
+        <article class="project-card">
+          <p class="project-type">04 / IDENTITY</p>
+          <h3>人物一致性治理</h3>
+          <p>
+            通过 face clustering、人工复核和 reference 图集建设，为同一人物分配稳定 identity_id，
+            避免模型把服装或场景误学为人物特征。
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="schema">
+      <div class="section-heading">
+        <p class="section-label">Schema</p>
+        <h2>数据结构与字段设计</h2>
+      </div>
+      <div class="schema-layout">
+        <article class="card">
+          <h3>主样本格式</h3>
+          <p>
+            训练主文件采用 `jsonl`，每行一个镜头级 clip。字段同时覆盖视频基础信息、
+            审美标签、文本监督、人物 identity 与质量审核结果。
+          </p>
+          <div class="tag-list-wrap">
+            <span class="tag">clip_id</span>
+            <span class="tag">aesthetic_bucket</span>
+            <span class="tag">identity_ids</span>
+            <span class="tag">lighting</span>
+            <span class="tag">color_tone</span>
+            <span class="tag">factual_caption</span>
+            <span class="tag">aesthetic_caption</span>
+            <span class="tag">training_prompt</span>
+            <span class="tag">quality_tier</span>
+            <span class="tag">review_status</span>
+          </div>
+        </article>
+
+        <article class="code-card">
+          <div class="code-card-header">
+            <span>metadata_template_v1.json</span>
+            <span>example</span>
+          </div>
+<pre><code>{
+  "clip_id": "ms_000001",
+  "aesthetic_bucket": "minimal_indoor_portrait",
+  "identity_ids": ["person_0007"],
+  "lighting": "soft_window_light",
+  "color_tone": "muted_warm",
+  "factual_caption": "...",
+  "aesthetic_caption": "...",
+  "training_prompt": "...",
+  "quality_tier": "S",
+  "review_status": "approved"
+}</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="workflow">
+      <div class="section-heading">
+        <p class="section-label">Workflow</p>
+        <h2>数据生产与审核工作流</h2>
+      </div>
+      <div class="timeline">
+        <article class="timeline-item">
+          <span class="timeline-step">Step 1</span>
+          <h3>采集与预清洗</h3>
+          <p>记录来源、授权、原始视频信息，并去除重复素材、强字幕、水印与明显偏离目标审美的片段。</p>
+        </article>
+        <article class="timeline-item">
+          <span class="timeline-step">Step 2</span>
+          <h3>镜头级切片</h3>
+          <p>将长视频切为 2-8 秒 clip，每条样本尽量只承载一个主主体、一个主动作和一种主要镜头语言。</p>
+        </article>
+        <article class="timeline-item">
+          <span class="timeline-step">Step 3</span>
+          <h3>自动分析与文本重写</h3>
+          <p>生成初始 metadata，再按照标注规范重写 factual caption、aesthetic caption 与 training prompt。</p>
+        </article>
+        <article class="timeline-item">
+          <span class="timeline-step">Step 4</span>
+          <h3>identity 归并与质检</h3>
+          <p>做人脸聚类和人工校验，检查文本对齐、审美纯度、人物一致性，再给出 S / A / B / P 等级。</p>
+        </article>
+        <article class="timeline-item">
+          <span class="timeline-step">Step 5</span>
+          <h3>偏好学习样本构建</h3>
+          <p>对语义相近样本进行 chosen / rejected 比较，记录偏好原因，为后续 DPO 或 reward modeling 提供基础。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="guidelines">
+      <div class="section-heading">
+        <p class="section-label">Documentation</p>
+        <h2>文档体系</h2>
+      </div>
+      <div class="docs-grid">
+        <article class="card">
+          <h3>Dataset Spec</h3>
+          <p>定义整体目标、样本层级、风格桶、字段 schema、数据分布和 MVP 范围。</p>
+        </article>
+        <article class="card">
+          <h3>Annotation Guideline</h3>
+          <p>规范 metadata、caption 改写、identity 归并、审核 checklist 和常见错误。</p>
+        </article>
+        <article class="card">
+          <h3>Preference Labeling</h3>
+          <p>建立 pairwise 偏好标注规则，帮助模型学到“哪个更接近目标审美”。</p>
+        </article>
+        <article class="card">
+          <h3>Metadata Template</h3>
+          <p>提供可直接对接程序与训练流程的结构化模板，便于稳定入库和后续扩展。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="roadmap">
+      <div class="section-heading">
+        <p class="section-label">Roadmap</p>
+        <h2>下一步计划</h2>
+      </div>
+      <div class="roadmap-grid">
+        <article class="card">
+          <h3>MVP</h3>
+          <p>先围绕 3 个 aesthetic buckets 构建 300-1000 个高质量 clip，验证风格迁移与 identity 稳定性。</p>
+        </article>
+        <article class="card">
+          <h3>Training</h3>
+          <p>先保留基础视频生成能力，再注入审美偏好数据，最后使用偏好样本进行进一步优化。</p>
+        </article>
+        <article class="card">
+          <h3>Evaluation</h3>
+          <p>重点观察 prompt 风格可迁移性、输出审美偏置、人物一致性和模板化风险。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section contact" id="contact">
+      <div class="section-heading">
+        <p class="section-label">Contact</p>
+        <h2>联系与仓库</h2>
+      </div>
+      <div class="contact-card">
+        <p>
+          这个主页现在已经从通用个人模板改造成项目型展示页，适合直接作为 GitHub Pages 首页，
+          对外展示这套审美偏好视频数据集方案。
+        </p>
+        <div class="contact-links">
+          <a href="https://github.com/handanluoa" target="_blank" rel="noreferrer">GitHub Profile</a>
+          <a href="https://github.com/handanluoa/handanluoa.github.io" target="_blank" rel="noreferrer">Pages Repository</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
